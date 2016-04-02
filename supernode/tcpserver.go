@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-//Message base message type
+//Message base message type, not used yet
 type Message struct {
 	src  string
 	kind string
@@ -19,10 +19,11 @@ type Message struct {
 var nodeAddr = make(map[string]string)
 
 func main() {
-	// service := ":1200"
-	// tcpAddr, err := net.ResolveTCPAddr("localhost", service)
-	// checkError(err)
-	listener, err := net.Listen("tcp", ":8080")
+	// connect to server instance
+	go connectServer()
+
+	// listen to node connection requests? (not sure if is required)
+	listener, err := net.Listen("tcp", ":7070")
 	checkError(err)
 
 	for {
@@ -31,14 +32,13 @@ func main() {
 			continue
 		}
 		go handleClient(conn)
-		// daytime := time.Now().String()
-		// conn.Write([]byte(daytime)) // don't care about return value
-		// conn.Close()                // we're finished with this client
 	}
 }
 
 func handleClient(conn net.Conn) {
+	//TODO: add node to set: nodeAddr
 	fmt.Print(conn.RemoteAddr().String())
+
 	var buf [512]byte
 	for {
 		n, err := conn.Read(buf[0:])

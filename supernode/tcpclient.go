@@ -7,14 +7,10 @@ import (
 	"os"
 )
 
-func main() {
-	// if len(os.Args) != 2 {
-	// 	fmt.Fprintf(os.Stderr, "Usage: %s host:port ", os.Args[0])
-	// 	os.Exit(1)
-	// }
-	service := "127.0.0.1:8080" //os.Args[1]
+var serverAddr = "127.0.0.1:7070"
 
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
+func connectServer() {
+	tcpAddr, err := net.ResolveTCPAddr("tcp4", serverAddr)
 	checkError(err)
 
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
@@ -30,11 +26,4 @@ func main() {
 	fmt.Println(string(result))
 
 	os.Exit(0)
-}
-
-func checkError(err error) {
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
-		os.Exit(1)
-	}
 }
