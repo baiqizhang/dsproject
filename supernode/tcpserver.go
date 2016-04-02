@@ -23,7 +23,7 @@ func main() {
 	go connectServer()
 
 	// listen to node connection requests? (not sure if is required)
-	listener, err := net.Listen("tcp", ":7070")
+	listener, err := net.Listen("tcp", ":6060")
 	checkError(err)
 
 	for {
