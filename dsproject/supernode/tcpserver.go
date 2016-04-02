@@ -4,17 +4,10 @@ goDaytimeServer
 package main
 
 import (
+	"dsproject/util"
 	"fmt"
 	"net"
-	"os"
 )
-
-//Message base message type, not used yet
-type Message struct {
-	src  string
-	kind string
-	data string
-}
 
 var nodeAddr = make(map[string]string)
 
@@ -24,7 +17,7 @@ func main() {
 
 	// listen to node connection requests? (not sure if is required)
 	listener, err := net.Listen("tcp", ":6060")
-	checkError(err)
+	util.CheckError(err)
 
 	for {
 		conn, err := listener.Accept()
@@ -50,12 +43,5 @@ func handleClient(conn net.Conn) {
 		if err2 != nil {
 			return
 		}
-	}
-}
-
-func checkError(err error) {
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
-		os.Exit(1)
 	}
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"dsproject/util"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -11,17 +12,18 @@ var serverAddr = "127.0.0.1:7070"
 
 func connectServer() {
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", serverAddr)
-	checkError(err)
+
+	util.CheckError(err)
 
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
-	checkError(err)
+	util.CheckError(err)
 
 	_, err = conn.Write([]byte("test message\r\n"))
-	checkError(err)
+	util.CheckError(err)
 
 	//result, err := readFully(conn)
 	result, err := ioutil.ReadAll(conn)
-	checkError(err)
+	util.CheckError(err)
 
 	fmt.Println(string(result))
 
