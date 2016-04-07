@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
+	"dsproject/util"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
-	"os"
+	"strings"
 	"sync"
 )
 
@@ -31,7 +34,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 		listener, err := net.Listen("tcp", ":7070")
-		checkError(err)
+		util.CheckError(err)
 
 		for {
 			conn, err := listener.Accept()
@@ -48,23 +51,38 @@ func handleClient(conn net.Conn) {
 	//TODO: add node to set: nodeAddr
 	fmt.Print(conn.RemoteAddr().String())
 
-	var buf [512]byte
-	for {
-		n, err := conn.Read(buf[0:])
-		if err != nil {
-			return
-		}
-		fmt.Println(string(buf[0:]))
-		_, err2 := conn.Write(buf[0:n])
-		if err2 != nil {
-			return
-		}
-	}
-}
+	reader := bufio.NewReader(conn)
+	writer := bufio.NewWriter(conn)
 
-func checkError(err error) {
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
-		os.Exit(1)
+	for {
+		message, err := reader.ReadString('\n')
+		if err == io.EOF {
+			break
+		}
+		util.CheckError(err)
+
+		fmt.Println("[Message Received]:" + message)
+
+		words := strings.Split(message, " ")
+
+		if words[0] == "REGISTER" {
+			fmt.Println("[reg]:" + words[1])
+			continue
+		}
+		writer.WriteString("error: not recognized")
 	}
+	// var buf [512]byte
+	// for {
+	// 	_, err := conn.Read(buf[0:])
+	// 	if err != nil {
+	// 		return
+	// 	}
+	// 	command := string(buf[0:])
+	// 	fmt.Println(command)
+	//
+	// 	_, err2 := conn.Write(reply)
+	// 	if err2 != nil {
+	// 		return
+	// 	}
+	// }
 }
