@@ -15,7 +15,7 @@ type Message struct {
 //CheckError just check and print error
 func CheckError(err error) {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
-		os.Exit(1)
+		fmt.Fprintf(os.Stderr, "Fatal error: %s\n", err.Error())
+		//os.Exit(1)
 	}
 }

@@ -1,6 +1,3 @@
-/*
-goDaytimeServer
-*/
 package main
 
 import (

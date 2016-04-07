@@ -18,7 +18,7 @@ func connectServer() {
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
 	util.CheckError(err)
 
-	_, err = conn.Write([]byte("test message\r\n"))
+	_, err = conn.Write([]byte("REGISTER SER=666222\r\n"))
 	util.CheckError(err)
 
 	//result, err := readFully(conn)
