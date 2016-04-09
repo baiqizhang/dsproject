@@ -4,29 +4,22 @@ import (
 	"bufio"
 	"dsproject/util"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
+	"os"
 	"strings"
-	"sync"
 )
-
-//
-var outgoing = make(chan string)
 
 // Default HTTP Request Handler for UI
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "<h1>Hello from Team 9 %s!</h1>", r.URL.Path[1:])
 }
 
-func main() {
-	// wait until all routines finish
-	var wg sync.WaitGroup
-	wg.Add(2)
+var clients []util.Client
 
+func main() {
 	//start HTTP UI server at 8080
 	go func() {
-		defer wg.Done()
 		http.HandleFunc("/", defaultHandler)
 		http.ListenAndServe(":8080", nil)
 	}()
@@ -35,7 +28,6 @@ func main() {
 
 	// start TCP, listening at 7070
 	go func() {
-		defer wg.Done()
 		listener, err := net.Listen("tcp", ":7070")
 		util.CheckError(err)
 
@@ -44,58 +36,36 @@ func main() {
 			if err != nil {
 				continue
 			}
-			go handleClient(conn)
+			newClient := util.Client{Conn: conn, Name: "none"}
+			clients = append(clients, newClient)
+			go handleClient(newClient)
 		}
 	}()
-	// outgoing <- "127.0.0.1:6060\n"
-	// println("supernode ip sent")
-	wg.Wait()
-	// for {
-	// 	time.Sleep(1000 * time.Millisecond)
-	// 	outgoing <- "test\n"
-	// 	println("test message sent")
-	// }
 
+	stdin := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print("Enter command: ")
+		cmd, _ := stdin.ReadString('\n')
+		processCommand(cmd)
+	}
 }
 
-func handleClient(conn net.Conn) {
-	//TODO: add node to set: nodeAddr
-	fmt.Println("[New Client]:" + conn.RemoteAddr().String())
+func processCommand(cmd string) {
+	args := strings.Split(cmd, " ")
 
-	reader := bufio.NewReader(conn)
-	writer := bufio.NewWriter(conn)
-
-	/*
-		// Write handler
-		go func() {
-			for data := range outgoing {
-				writer.WriteString(data)
-				writer.Flush()
-			}
-		}()
-	*/
-
-	// Read handler
-	for {
-		message, err := reader.ReadString('\n')
-		if err == io.EOF {
-			break
+	//Compute distance to the customer
+	if args[0] == "PICKUP" {
+		//Pickup the customer
+		source := util.ParseFloatCoordinates(args[1], args[2])
+		dest := util.ParseFloatCoordinates(args[3], args[4])
+		if source == nil || dest == nil {
+			fmt.Println("Error: incorrect PICKUP format")
+			os.Exit(0)
 		}
-		util.CheckError(err)
-
-		fmt.Print("[Message Received]:" + message)
-
-		words := strings.Split(message, " ")
-
-		// if connection comes from CarNode
-		if words[0] == "REGISTER" {
-			fmt.Println("[Register]:" + words[1])
-			writer.WriteString("127.0.0.1:6060\n")
-			writer.WriteString("OK\n")
-			writer.Flush()
-			conn.Close()
-			break
+		for _, client := range clients {
+			conn := client.Conn
+			writer := bufio.NewWriter(conn)
+			writer.WriteString("PICKUP " + args[1] + " " + args[2] + " " + args[3] + " " + args[4])
 		}
-		fmt.Println("error: message not recognized")
 	}
 }

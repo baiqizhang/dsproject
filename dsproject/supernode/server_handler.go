@@ -28,5 +28,6 @@ func dialServer() {
 		util.CheckError(err)
 
 		fmt.Println("[Server Message]:" + message)
+
 	}
 }

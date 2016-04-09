@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"math"
+	"net"
 	"os"
 	"strconv"
 	"time"
@@ -14,6 +15,12 @@ import (
 
 //ServerAddr address of the central server
 const ServerAddr = "127.0.0.1:7070"
+
+//Client a struct that models a TCP Client by connection and name
+type Client struct {
+	Conn net.Conn
+	Name string
+}
 
 /*
 	Struct Point

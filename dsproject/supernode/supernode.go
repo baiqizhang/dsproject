@@ -6,12 +6,7 @@ import (
 	"net"
 )
 
-type client struct {
-	conn net.Conn
-	name string
-}
-
-var clients []client
+var clients []util.Client
 
 func main() {
 	// connect to frontend instance
@@ -25,7 +20,7 @@ func main() {
 		conn, err := listener.Accept()
 		util.CheckError(err)
 
-		newClient := client{conn: conn, name: "none"}
+		newClient := util.Client{Conn: conn, Name: "none"}
 		clients = append(clients, newClient)
 		go handleNode(newClient)
 	}

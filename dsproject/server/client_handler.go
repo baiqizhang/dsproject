@@ -8,9 +8,11 @@ import (
 	"strings"
 )
 
-func handleNode(client util.Client) {
-	fmt.Println(client.Conn.RemoteAddr().String())
-	reader := bufio.NewReader(client.Conn)
+func handleClient(client util.Client) {
+	conn := client.Conn
+	fmt.Println("[New Client]:" + conn.RemoteAddr().String())
+
+	reader := bufio.NewReader(conn)
 
 	// Read handler
 	for {
@@ -20,14 +22,14 @@ func handleNode(client util.Client) {
 		}
 		util.CheckError(err)
 
-		fmt.Println("[Node Message]:" + message)
+		fmt.Print("[Message Received]:" + message)
 
 		words := strings.Split(message, " ")
 
 		// if connection comes from CarNode
-		if words[0] == "NAME" {
-			fmt.Println("[Node] Register Name:" + words[1])
-			client.Name = words[1]
+		if words[0] == "COMPUTERESULT" {
+			fmt.Println("[COMPUTERESULT]:" + words[1])
+			break
 		}
 		fmt.Println("error: message not recognized")
 	}
