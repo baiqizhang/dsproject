@@ -1,23 +1,24 @@
 package main
 
 import (
+	"bufio"
+	"dsproject/util"
 	"fmt"
+	"io"
 	"net"
 )
 
 func handleNode(conn net.Conn) {
-	fmt.Print(conn.RemoteAddr().String())
-
-	var buf [512]byte
+	fmt.Println(conn.RemoteAddr().String())
+	reader := bufio.NewReader(conn)
+	// Read handler
 	for {
-		n, err := conn.Read(buf[0:])
-		if err != nil {
-			return
+		message, err := reader.ReadString('\n')
+		if err == io.EOF {
+			break
 		}
-		fmt.Println(string(buf[0:]))
-		_, err2 := conn.Write(buf[0:n])
-		if err2 != nil {
-			return
-		}
+		util.CheckError(err)
+
+		fmt.Println("[Message Received]:" + message)
 	}
 }

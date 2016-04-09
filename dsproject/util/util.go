@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 )
@@ -10,6 +11,14 @@ type Message struct {
 	src  string
 	kind string
 	data string
+}
+
+//Node communication unit
+type Node struct {
+	incoming chan string
+	outgoing chan string
+	reader   *bufio.Reader
+	writer   *bufio.Writer
 }
 
 //CheckError just check and print error

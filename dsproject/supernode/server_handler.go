@@ -1,11 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"dsproject/util"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
-	"os"
 )
 
 var serverAddr = "127.0.0.1:7070"
@@ -21,11 +21,15 @@ func connectServer() {
 	_, err = conn.Write([]byte("REGISTER SER=666222\r\n"))
 	util.CheckError(err)
 
-	//result, err := readFully(conn)
-	result, err := ioutil.ReadAll(conn)
-	util.CheckError(err)
+	reader := bufio.NewReader(conn)
+	// Read handler
+	for {
+		message, err := reader.ReadString('\n')
+		if err == io.EOF {
+			break
+		}
+		util.CheckError(err)
 
-	fmt.Println(string(result))
-
-	os.Exit(0)
+		fmt.Println("[Message Received]:" + message)
+	}
 }

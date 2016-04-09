@@ -2,11 +2,10 @@ package main
 
 import (
 	"dsproject/util"
-	"fmt"
 	"net"
 )
 
-var nodeAddr = make(map[string]string)
+// var nodeAddr = make(map[string]string)
 
 func main() {
 	// connect to server instance
@@ -21,24 +20,6 @@ func main() {
 		if err != nil {
 			continue
 		}
-		go handleClient(conn)
-	}
-}
-
-func handleClient(conn net.Conn) {
-	//TODO: add node to set: nodeAddr
-	fmt.Print(conn.RemoteAddr().String())
-
-	var buf [512]byte
-	for {
-		n, err := conn.Read(buf[0:])
-		if err != nil {
-			return
-		}
-		fmt.Println(string(buf[0:]))
-		_, err2 := conn.Write(buf[0:n])
-		if err2 != nil {
-			return
-		}
+		go handleNode(conn)
 	}
 }

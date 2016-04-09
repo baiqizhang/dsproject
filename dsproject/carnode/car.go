@@ -1,16 +1,16 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"net"
 	"bufio"
-	"time"
+	"container/list"
+	"fmt"
 	"log"
 	"math"
+	"net"
+	"os"
 	"strconv"
 	"strings"
-	"container/list"
+	"time"
 )
 
 type Point struct {
@@ -71,24 +71,24 @@ func main() {
 
 func handle_conn(conn net.Conn) {
 	connbuf := bufio.NewReader(conn)
-	cmd, _ := connbuf.ReadString('\n')	
-	
+	cmd, _ := connbuf.ReadString('\n')
+
 	if idle == true {
 		process_command(cmd, conn)
 	}
 }
 
 func get_supernodes_addr() list.List {
-	var feServer = "127.0.0.1:12345"
+	var feServer = "127.0.0.1:7070"
 	var ipList list.List
 	conn, err := net.Dial("tcp", feServer)
 	for err != nil {
 		fmt.Println("Unable to connect to the front-end server")
 		conn, err = net.Dial("tcp", feServer)
-		time.Sleep(200*time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 	}
 
-	conn.Write([]byte("REGISTRATION\n"))
+	conn.Write([]byte("REGISTER CAR1\n"))
 
 	// build a table of supernodes' IP
 	connbuf := bufio.NewReader(conn)
@@ -99,7 +99,7 @@ func get_supernodes_addr() list.List {
 			break
 		}
 
-		ipList.PushBack(ip[0:len(ip)-1])
+		ipList.PushBack(ip[0 : len(ip)-1])
 	}
 	conn.Close()
 
@@ -128,7 +128,7 @@ func process_command(cmd string, conn net.Conn) {
 	if strings.Compare(args[0], "COMPUTE") == 0 {
 		x, y := parse_float_coordinates(args[1], args[2])
 		d := compute_distance(x, y)
-		
+
 		conn.Write([]byte(myNetAddr + " " + strconv.FormatFloat(d, 'f', 4, 64)))
 	} else if strings.Compare(args[0], "PICKUP") == 0 {
 		dest.x, dest.y = parse_float_coordinates(args[1], args[2])
@@ -136,10 +136,10 @@ func process_command(cmd string, conn net.Conn) {
 }
 
 func compute_distance(x float64, y float64) float64 {
-	return math.Sqrt((curLoc.x - x) * (curLoc.x - x) + (curLoc.y - y) * (curLoc.y - y))
+	return math.Sqrt((curLoc.x-x)*(curLoc.x-x) + (curLoc.y-y)*(curLoc.y-y))
 }
 
-func parse_float_coordinates(strx string, stry string) (float64, float64){
+func parse_float_coordinates(strx string, stry string) (float64, float64) {
 	x, err := strconv.ParseFloat(strx, 64)
 	if err != nil {
 		fmt.Println("x coordinate is not a valid float value")
@@ -159,14 +159,14 @@ func drive_customer(customer Point, dest Point) {
 	idle = false
 
 	// simulate picking up customer
-	time.Sleep(1500*time.Millisecond)
-	
+	time.Sleep(1500 * time.Millisecond)
+
 	// update current location
 	curLoc.x = customer.x
 	curLoc.y = customer.y
 	fmt.Println("Customer picked up")
 
-	time.Sleep(1500*time.Millisecond)
+	time.Sleep(1500 * time.Millisecond)
 	fmt.Println("Drop customer")
 	curLoc.x = dest.x
 	curLoc.y = dest.y

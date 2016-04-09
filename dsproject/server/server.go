@@ -9,7 +9,10 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 )
+
+var outgoing = make(chan string)
 
 // Default Request Handler
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +24,7 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	//start server
+	//start HTTP UI server at 8080
 	go func() {
 		defer wg.Done()
 		http.HandleFunc("/", defaultHandler)
@@ -30,7 +33,7 @@ func main() {
 
 	fmt.Print("web server running on 8080\n")
 
-	// start TCP
+	// start TCP, listening at 7070
 	go func() {
 		defer wg.Done()
 		listener, err := net.Listen("tcp", ":7070")
@@ -44,16 +47,32 @@ func main() {
 			go handleClient(conn)
 		}
 	}()
-	wg.Wait()
+
+	// wg.Wait()
+	for {
+		time.Sleep(1000 * time.Millisecond)
+		outgoing <- "test\n"
+		println("test message sent")
+	}
+
 }
 
 func handleClient(conn net.Conn) {
 	//TODO: add node to set: nodeAddr
-	fmt.Print(conn.RemoteAddr().String())
+	fmt.Println("[New Client]:" + conn.RemoteAddr().String())
 
 	reader := bufio.NewReader(conn)
 	writer := bufio.NewWriter(conn)
 
+	// Write handler
+	go func() {
+		for data := range outgoing {
+			writer.WriteString(data)
+			writer.Flush()
+		}
+	}()
+
+	// Read handler
 	for {
 		message, err := reader.ReadString('\n')
 		if err == io.EOF {
@@ -61,28 +80,14 @@ func handleClient(conn net.Conn) {
 		}
 		util.CheckError(err)
 
-		fmt.Println("[Message Received]:" + message)
+		fmt.Print("[Message Received]:" + message)
 
 		words := strings.Split(message, " ")
 
 		if words[0] == "REGISTER" {
-			fmt.Println("[reg]:" + words[1])
+			fmt.Println("[Register]:" + words[1])
 			continue
 		}
-		writer.WriteString("error: not recognized")
+		writer.WriteString("error: message not recognized")
 	}
-	// var buf [512]byte
-	// for {
-	// 	_, err := conn.Read(buf[0:])
-	// 	if err != nil {
-	// 		return
-	// 	}
-	// 	command := string(buf[0:])
-	// 	fmt.Println(command)
-	//
-	// 	_, err2 := conn.Write(reply)
-	// 	if err2 != nil {
-	// 		return
-	// 	}
-	// }
 }
