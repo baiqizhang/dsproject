@@ -96,6 +96,6 @@ func handleClient(conn net.Conn) {
 			conn.Close()
 			break
 		}
-		writer.WriteString("error: message not recognized")
+		fmt.Println("error: message not recognized")
 	}
 }

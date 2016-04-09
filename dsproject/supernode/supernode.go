@@ -6,6 +6,13 @@ import (
 	"net"
 )
 
+type client struct {
+	conn net.Conn
+	name string
+}
+
+var clients []client
+
 func main() {
 	// connect to frontend instance
 	go dialServer()
@@ -18,6 +25,8 @@ func main() {
 		conn, err := listener.Accept()
 		util.CheckError(err)
 
-		go handleNode(conn)
+		newClient := client{conn: conn, name: "none"}
+		clients = append(clients, newClient)
+		go handleNode(newClient)
 	}
 }
