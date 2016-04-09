@@ -5,11 +5,9 @@ import (
 	"net"
 )
 
-// var nodeAddr = make(map[string]string)
-
 func main() {
-	// connect to server instance
-	go connectServer()
+	// connect to frontend instance
+	go dialServer()
 
 	// listen to node connection requests? (not sure if is required)
 	listener, err := net.Listen("tcp", ":6060")
@@ -17,9 +15,8 @@ func main() {
 
 	for {
 		conn, err := listener.Accept()
-		if err != nil {
-			continue
-		}
+		util.CheckError(err)
+
 		go handleNode(conn)
 	}
 }

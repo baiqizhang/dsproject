@@ -8,17 +8,14 @@ import (
 	"net"
 )
 
-var serverAddr = "127.0.0.1:7070"
-
-func connectServer() {
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", serverAddr)
-
+func dialServer() {
+	tcpAddr, err := net.ResolveTCPAddr("tcp4", util.ServerAddr)
 	util.CheckError(err)
 
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
 	util.CheckError(err)
 
-	_, err = conn.Write([]byte("REGISTER SER=666222\r\n"))
+	_, err = conn.Write([]byte("SUPERNODE REGISTER SN1\r\n"))
 	util.CheckError(err)
 
 	reader := bufio.NewReader(conn)

@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"strings"
 	"sync"
-	"time"
 )
 
 //
@@ -48,13 +47,14 @@ func main() {
 			go handleClient(conn)
 		}
 	}()
-
-	// wg.Wait()
-	for {
-		time.Sleep(1000 * time.Millisecond)
-		outgoing <- "test\n"
-		println("test message sent")
-	}
+	// outgoing <- "127.0.0.1:6060\n"
+	// println("supernode ip sent")
+	wg.Wait()
+	// for {
+	// 	time.Sleep(1000 * time.Millisecond)
+	// 	outgoing <- "test\n"
+	// 	println("test message sent")
+	// }
 
 }
 
@@ -65,13 +65,15 @@ func handleClient(conn net.Conn) {
 	reader := bufio.NewReader(conn)
 	writer := bufio.NewWriter(conn)
 
-	// Write handler
-	go func() {
-		for data := range outgoing {
-			writer.WriteString(data)
-			writer.Flush()
-		}
-	}()
+	/*
+		// Write handler
+		go func() {
+			for data := range outgoing {
+				writer.WriteString(data)
+				writer.Flush()
+			}
+		}()
+	*/
 
 	// Read handler
 	for {
@@ -85,9 +87,14 @@ func handleClient(conn net.Conn) {
 
 		words := strings.Split(message, " ")
 
+		// if connection comes from CarNode
 		if words[0] == "REGISTER" {
 			fmt.Println("[Register]:" + words[1])
-			continue
+			writer.WriteString("127.0.0.1:6060\n")
+			writer.WriteString("OK\n")
+			writer.Flush()
+			conn.Close()
+			break
 		}
 		writer.WriteString("error: message not recognized")
 	}
