@@ -5,6 +5,7 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"time"
 )
 
 /*
@@ -25,7 +26,7 @@ type Point struct {
 }
 
 //DistanceTo compute the distance from V1 to V2
-func (v1 *Point) DistanceTo(v2 *Point) float64 {
+func (v1 *Point) DistanceTo(v2 Point) float64 {
 	return math.Sqrt((v1.X-v2.X)*(v1.X-v2.X) + (v1.Y-v2.Y)*(v1.Y-v2.Y))
 }
 
@@ -44,6 +45,34 @@ func ParseFloatCoordinates(strx string, stry string) *Point {
 	}
 	result := Point{X: x, Y: y}
 	return &result
+}
+
+/*
+	Struct VirtualCar
+*/
+
+//VirtualCar simulated car instance
+type VirtualCar struct {
+	Name     string
+	Location Point
+	Idle     bool
+}
+
+//DriveCustomer simulate a ride from currentLoc to customerLoc then to destLoc
+func DriveCustomer(car *VirtualCar, customerLoc *Point, dest *Point) {
+	car.Idle = false
+
+	// simulate picking up customer
+	time.Sleep(1500 * time.Millisecond)
+
+	// update current location
+	car.Location = *customerLoc
+	fmt.Println("[Simulation] Customer picked up")
+
+	time.Sleep(1500 * time.Millisecond)
+	fmt.Println("[Simulation] Drop customer")
+
+	car.Location = *dest
 }
 
 /*

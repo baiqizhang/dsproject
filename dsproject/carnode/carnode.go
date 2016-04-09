@@ -12,14 +12,9 @@ import (
 	"time"
 )
 
-var curLoc *util.Point
-var dest *util.Point
-var customerLoc *util.Point
-
-var nodeName string
+var virtualCar util.VirtualCar
 
 var myNetAddr string
-var idle = false
 
 func main() {
 	// Check arguments
@@ -30,11 +25,12 @@ func main() {
 	}
 
 	// set car current position
-	curLoc = util.ParseFloatCoordinates(args[0], args[1])
-	if curLoc == nil {
-		fmt.Println("incorrect XCOORD format")
+	ptrPoint := util.ParseFloatCoordinates(args[0], args[1])
+	if ptrPoint == nil {
+		fmt.Println("Error: incorrect XCOORD format")
 		os.Exit(0)
 	}
+	virtualCar.Location = *ptrPoint
 
 	// Get supernode addresses
 	supernodes := getSupernodesAddr()
@@ -85,9 +81,7 @@ func dialSuperNode(supernode string) {
 	connbuf := bufio.NewReader(conn)
 	for {
 		cmd, _ := connbuf.ReadString('\n')
-		if idle == true {
-			processCommand(cmd, conn)
-		}
+		processCommand(cmd, conn)
 	}
 }
 
@@ -95,27 +89,29 @@ func dialSuperNode(supernode string) {
 func processCommand(cmd string, conn net.Conn) {
 	args := strings.Split(cmd, " ")
 
-	if strings.Compare(args[0], "COMPUTE") == 0 {
-		point := util.ParseFloatCoordinates(args[1], args[2])
-		d := point.DistanceTo(curLoc)
+	//Compute distance to the customer
+	if args[0] == "COMPUTE" {
+		var distance float64
 
-		conn.Write([]byte(myNetAddr + " " + strconv.FormatFloat(d, 'f', 4, 64)))
-	} else if strings.Compare(args[0], "PICKUP") == 0 {
-		dest = util.ParseFloatCoordinates(args[1], args[2])
+		//if not idle, return -1
+		if virtualCar.Idle {
+			point := util.ParseFloatCoordinates(args[1], args[2])
+			distance = point.DistanceTo(virtualCar.Location)
+		} else {
+			distance = -1
+		}
+
+		conn.Write([]byte(myNetAddr + " " + strconv.FormatFloat(distance, 'f', 4, 64)))
+	} else if args[0] == "PICKUP" {
+		//Pickup the customer
+		source := util.ParseFloatCoordinates(args[1], args[2])
+		dest := util.ParseFloatCoordinates(args[3], args[4])
+		if source == nil || dest == nil {
+			fmt.Println("Error: incorrect PICKUP format")
+			os.Exit(0)
+		}
+
+		//Start simulation
+		go util.DriveCustomer(&virtualCar, source, dest)
 	}
-}
-
-func driveCustomer(customerLoc *util.Point, dest *util.Point) {
-	idle = false
-
-	// simulate picking up customer
-	time.Sleep(1500 * time.Millisecond)
-
-	// update current location
-	curLoc = customerLoc
-	fmt.Println("Customer picked up")
-
-	time.Sleep(1500 * time.Millisecond)
-	fmt.Println("Drop customer")
-	curLoc = dest
 }
