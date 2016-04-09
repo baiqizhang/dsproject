@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"container/list"
+	"dsproject/util"
 	"fmt"
 	"log"
 	"math"
@@ -13,6 +14,7 @@ import (
 	"time"
 )
 
+//Point p(x,y) struct
 type Point struct {
 	x float64
 	y float64
@@ -45,7 +47,7 @@ func main() {
 	curLoc.x = x
 	curLoc.y = y
 
-	supernodes := get_supernodes_addr()
+	supernodes := getSupernodesAddr()
 
 	for e := supernodes.Front(); e != nil; e = e.Next() {
 		fmt.Println(e.Value.(string))
@@ -64,27 +66,26 @@ func main() {
 			log.Print(err)
 			continue
 		}
-		handle_conn(conn)
+		handleConn(conn)
 		conn.Close()
 	}
 }
 
-func handle_conn(conn net.Conn) {
+func handleConn(conn net.Conn) {
 	connbuf := bufio.NewReader(conn)
 	cmd, _ := connbuf.ReadString('\n')
 
 	if idle == true {
-		process_command(cmd, conn)
+		processCommand(cmd, conn)
 	}
 }
 
-func get_supernodes_addr() list.List {
-	var feServer = "127.0.0.1:7070"
+func getSupernodesAddr() list.List {
 	var ipList list.List
-	conn, err := net.Dial("tcp", feServer)
+	conn, err := net.Dial("tcp", util.ServerAddr)
 	for err != nil {
 		fmt.Println("Unable to connect to the front-end server")
-		conn, err = net.Dial("tcp", feServer)
+		conn, err = net.Dial("tcp", util.ServerAddr)
 		time.Sleep(200 * time.Millisecond)
 	}
 
@@ -106,7 +107,7 @@ func get_supernodes_addr() list.List {
 	return ipList
 }
 
-func wait_for_request_thrd(supernode string) {
+func waitForRequestThrd(supernode string) {
 	conn, err := net.Dial("tcp", supernode)
 
 	for err != nil {
@@ -117,29 +118,30 @@ func wait_for_request_thrd(supernode string) {
 	for {
 		cmd, _ := connbuf.ReadString('\n')
 		if idle == true {
-			process_command(cmd, conn)
+			processCommand(cmd, conn)
 		}
 	}
 }
 
-func process_command(cmd string, conn net.Conn) {
+//processCommand Process commands that's received by car node
+func processCommand(cmd string, conn net.Conn) {
 	args := strings.Split(cmd, " ")
 
 	if strings.Compare(args[0], "COMPUTE") == 0 {
-		x, y := parse_float_coordinates(args[1], args[2])
-		d := compute_distance(x, y)
+		x, y := parseFloatCoordinates(args[1], args[2])
+		d := computeDistance(x, y)
 
 		conn.Write([]byte(myNetAddr + " " + strconv.FormatFloat(d, 'f', 4, 64)))
 	} else if strings.Compare(args[0], "PICKUP") == 0 {
-		dest.x, dest.y = parse_float_coordinates(args[1], args[2])
+		dest.x, dest.y = parseFloatCoordinates(args[1], args[2])
 	}
 }
 
-func compute_distance(x float64, y float64) float64 {
+func computeDistance(x float64, y float64) float64 {
 	return math.Sqrt((curLoc.x-x)*(curLoc.x-x) + (curLoc.y-y)*(curLoc.y-y))
 }
 
-func parse_float_coordinates(strx string, stry string) (float64, float64) {
+func parseFloatCoordinates(strx string, stry string) (float64, float64) {
 	x, err := strconv.ParseFloat(strx, 64)
 	if err != nil {
 		fmt.Println("x coordinate is not a valid float value")
@@ -155,7 +157,7 @@ func parse_float_coordinates(strx string, stry string) (float64, float64) {
 	return x, y
 }
 
-func drive_customer(customer Point, dest Point) {
+func driveCustomer(customer Point, dest Point) {
 	idle = false
 
 	// simulate picking up customer

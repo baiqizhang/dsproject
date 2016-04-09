@@ -12,9 +12,10 @@ import (
 	"time"
 )
 
+//
 var outgoing = make(chan string)
 
-// Default Request Handler
+// Default HTTP Request Handler for UI
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "<h1>Hello from Team 9 %s!</h1>", r.URL.Path[1:])
 }

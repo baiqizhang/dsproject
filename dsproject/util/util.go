@@ -6,6 +6,9 @@ import (
 	"os"
 )
 
+//ServerAddr address of the central server
+const ServerAddr = "127.0.0.1:7070"
+
 //Message base message type, not used yet
 type Message struct {
 	src  string
