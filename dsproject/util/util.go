@@ -20,6 +20,7 @@ const ServerAddr = "127.0.0.1:7070"
 type Client struct {
 	Conn net.Conn
 	Name string
+	Type string
 }
 
 /*

@@ -55,7 +55,7 @@ func getSupernodesAddr() list.List {
 		time.Sleep(200 * time.Millisecond)
 	}
 
-	conn.Write([]byte("REGISTER CAR1\n"))
+	conn.Write([]byte("NODE REGISTER CAR1\n"))
 
 	// build a table of supernodes' IP
 	connbuf := bufio.NewReader(conn)

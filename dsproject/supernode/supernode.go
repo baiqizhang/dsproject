@@ -6,6 +6,7 @@ import (
 	"net"
 )
 
+var name string
 var clients []util.Client
 
 func main() {
