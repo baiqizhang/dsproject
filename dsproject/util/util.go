@@ -81,6 +81,7 @@ func DriveCustomer(car *VirtualCar, customerLoc *Point, dest *Point) {
 	fmt.Println("[Simulation] Drop customer")
 
 	car.Location = *dest
+	car.Idle = true
 }
 
 /*

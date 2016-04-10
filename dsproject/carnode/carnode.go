@@ -31,6 +31,7 @@ func main() {
 		os.Exit(0)
 	}
 	virtualCar.Location = *ptrPoint
+	virtualCar.Idle = true
 
 	// Get supernode addresses
 	supernodes := getSupernodesAddr()
