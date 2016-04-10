@@ -35,7 +35,6 @@ func dialServer() {
 
 // process command from Server
 func processCommand(cmd string) {
-	fmt.Println(cmd)
 	args := strings.Split(strings.Trim(cmd, "\r\n"), " ")
 
 	//Compute distance to the customer
@@ -62,9 +61,9 @@ func processCommand(cmd string) {
 				continue
 			}
 
-			fmt.Println("[PICKUP] send to CarNode:" + client.Conn.RemoteAddr().String())
+			fmt.Println("[COMPUTE] send to CarNode:" + client.Conn.RemoteAddr().String())
 			writer := bufio.NewWriter(conn)
-			writer.WriteString("PICKUP " + args[1] + " " + args[2] + " " + args[3] + " " + args[4] + "\n")
+			writer.WriteString("COMPUTE " + args[1] + " " + args[2] + "\n")
 			writer.Flush()
 		}
 	}

@@ -100,8 +100,9 @@ func processCommand(cmd string, conn net.Conn) {
 		} else {
 			distance = -1
 		}
-
-		conn.Write([]byte(myNetAddr + " " + strconv.FormatFloat(distance, 'f', 4, 64)))
+		writer := bufio.NewWriter(conn)
+		writer.WriteString("COMPUTERESULT " + myNetAddr + " " + strconv.FormatFloat(distance, 'f', 4, 64) + " " + args[1] + "  " + args[2] + "\n")
+		writer.Flush()
 	} else if args[0] == "PICKUP" {
 		//Pickup the customer
 		source := util.ParseFloatCoordinates(args[1], args[2])
