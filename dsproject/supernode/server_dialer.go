@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 )
 
 func dialServer() {
@@ -28,6 +29,43 @@ func dialServer() {
 		util.CheckError(err)
 
 		fmt.Println("[Server Message]:" + message)
+		processCommand(message)
+	}
+}
 
+// process command from Server
+func processCommand(cmd string) {
+	fmt.Println(cmd)
+	args := strings.Split(strings.Trim(cmd, "\r\n"), " ")
+
+	//Compute distance to the customer
+	if args[0] == "PICKUP" {
+		//Pickup the customer
+		source := util.ParseFloatCoordinates(args[1], args[2])
+		dest := util.ParseFloatCoordinates(args[3], args[4])
+		if source == nil || dest == nil {
+			fmt.Println("Error: incorrect PICKUP format:" + cmd)
+			return
+		}
+
+		var zero []byte
+		for _, client := range clients {
+			if client.Type == "NODE" {
+				continue
+			}
+			fmt.Println("client " + client.Type + " " + client.Name)
+			conn := client.Conn
+			fmt.Println(conn.RemoteAddr().String())
+			reader := bufio.NewReader(conn)
+			_, err := reader.Read(zero)
+			if err != nil {
+				continue
+			}
+
+			fmt.Println("[PICKUP] send to CarNode:" + client.Conn.RemoteAddr().String())
+			writer := bufio.NewWriter(conn)
+			writer.WriteString("PICKUP " + args[1] + " " + args[2] + " " + args[3] + " " + args[4] + "\n")
+			writer.Flush()
+		}
 	}
 }

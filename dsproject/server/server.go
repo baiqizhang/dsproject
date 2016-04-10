@@ -80,7 +80,7 @@ func processCommand(cmd string) {
 
 			fmt.Println("[PICKUP] send to SN:" + client.Conn.RemoteAddr().String())
 			writer := bufio.NewWriter(conn)
-			writer.WriteString("PICKUP " + args[1] + " " + args[2] + " " + args[3] + " " + args[4] + "\r\n")
+			writer.WriteString("PICKUP " + args[1] + " " + args[2] + " " + args[3] + " " + args[4] + "\n")
 			writer.Flush()
 		}
 	}

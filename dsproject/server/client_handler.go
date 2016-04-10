@@ -27,15 +27,14 @@ func handleClient(client *util.Client) {
 		words := strings.Split(message, " ")
 
 		// if connection comes from CarNode
+		client.Type = words[0]
 		if words[0] == "SUPERNODE" {
-			client.Type = "SUPERNODE"
 			if words[1] == "REGISTER" {
 				client.Name = words[2]
 				continue
 			}
 		}
 		if words[0] == "NODE" {
-			client.Type = "NODE"
 			if words[1] == "REGISTER" {
 				fmt.Println("[Node Register] send hardcoded supernode addr")
 				writer.WriteString("127.0.0.1:6060\n")

@@ -87,7 +87,7 @@ func dialSuperNode(supernode string) {
 
 //processCommand Process commands that's received by car node
 func processCommand(cmd string, conn net.Conn) {
-	args := strings.Split(cmd, " ")
+	args := strings.Split(strings.Trim(cmd, "\r\n"), " ")
 
 	//Compute distance to the customer
 	if args[0] == "COMPUTE" {
