@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+    "strconv"
 )
 
 // Default HTTP Request Handler for UI
@@ -16,7 +17,7 @@ func defaultHTTPHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 var clients []*util.Client
-
+var ReqID int
 func main() {
 	//start HTTP UI server at 8080
 	go func() {
@@ -80,8 +81,9 @@ func processCommand(cmd string) {
 
 			fmt.Println("[PICKUP] send to SN:" + client.Conn.RemoteAddr().String())
 			writer := bufio.NewWriter(conn)
-			writer.WriteString("PICKUP " + args[1] + " " + args[2] + " " + args[3] + " " + args[4] + "\n")
-			writer.Flush()
+			writer.WriteString("PICKUP " + args[1] + " " + args[2] + " " + args[3] + " " + args[4] + " " + strconv.Itoa(ReqID)+"\n")
+			ReqID++
+            writer.Flush()
 		}
 	}
 }

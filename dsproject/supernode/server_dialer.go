@@ -7,6 +7,8 @@ import (
 	"io"
 	"net"
 	"strings"
+    "math"
+    "strconv"
 )
 
 func dialServer() {
@@ -40,12 +42,23 @@ func processCommand(cmd string) {
 	//Compute distance to the customer
 	if args[0] == "PICKUP" {
 		//Pickup the customer
-		source := util.ParseFloatCoordinates(args[1], args[2])
-		dest := util.ParseFloatCoordinates(args[3], args[4])
-		if source == nil || dest == nil {
-			fmt.Println("Error: incorrect PICKUP format:" + cmd)
-			return
-		}
+		//source := util.ParseFloatCoordinates(args[1], args[2])
+		//dest := util.ParseFloatCoordinates(args[3], args[4])
+        source := args[1] + " " + args[2]
+        dest := args[3] + " " + args[4]
+		// if source == nil || dest == nil {
+		// 	fmt.Println("Error: incorrect PICKUP format:" + cmd)
+		// 	return
+		// }
+       
+        fmt.Println("In processCommand: " + strconv.Itoa(COUNTCAR))
+        request := util.Request{ math.MaxFloat64, nil, "", COUNTCAR, source, dest }
+        
+        fmt.Println("args[5] =  " + args[5])
+        REQMAP[args[5]] = request
+        fmt.Println("In MAP: " + strconv.Itoa(REQMAP[args[5]].Count))
+        
+        fmt.Println("ID:"+ args[5]+" counter"+ strconv.Itoa(COUNTCAR) )
 
 		var zero []byte
 		for _, client := range clients {
@@ -63,7 +76,7 @@ func processCommand(cmd string) {
 
 			fmt.Println("[COMPUTE] send to CarNode:" + client.Conn.RemoteAddr().String())
 			writer := bufio.NewWriter(conn)
-			writer.WriteString("COMPUTE " + args[1] + " " + args[2] + "\n")
+			writer.WriteString("COMPUTE " + args[1] + " " + args[2] + " "+ args[5]+ "\n")
 			writer.Flush()
 		}
 	}

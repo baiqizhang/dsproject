@@ -66,6 +66,16 @@ type VirtualCar struct {
 	Idle     bool
 }
 
+//struct for request
+type Request struct {
+    FinalResult float64
+    FinalConn net.Conn
+    Carname string
+    Count int
+    Source string
+    Dest string
+}
+
 //DriveCustomer simulate a ride from currentLoc to customerLoc then to destLoc
 func DriveCustomer(car *VirtualCar, customerLoc *Point, dest *Point) {
 	car.Idle = false

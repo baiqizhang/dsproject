@@ -9,13 +9,15 @@ import (
 var name string
 var clients []util.Client
 
-var m map[string]util.Client
+//map for <request id, request struct>
+var REQMAP map[string]util.Request = make(map[string]util.Request)
+
+//counter for carnodes which are ordinary nodes and counter for supernodes
+var COUNTCAR int = 0
+var COUNTSUPER int = 0
 
 func main() {
-    
-    //initialize the map
-    m:= make(map[string]util.Client)
-    
+
 	// connect to frontend instance
 	go dialServer()
 

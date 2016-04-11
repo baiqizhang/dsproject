@@ -10,11 +10,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+    "math"
 )
 
 var virtualCar util.VirtualCar
-
-var myNetAddr string
 
 func main() {
 	// Check arguments
@@ -32,6 +31,7 @@ func main() {
 	}
 	virtualCar.Location = *ptrPoint
 	virtualCar.Idle = true
+    virtualCar.Name = args[2]
 
 	// Get supernode addresses
 	supernodes := getSupernodesAddr()
@@ -79,6 +79,8 @@ func dialSuperNode(supernode string) {
 		conn, err = net.Dial("tcp", supernode)
 	}
 
+    conn.Write([]byte("CARNODE\n"))
+    
 	connbuf := bufio.NewReader(conn)
 	for {
 		cmd, _ := connbuf.ReadString('\n')
@@ -99,10 +101,11 @@ func processCommand(cmd string, conn net.Conn) {
 			point := util.ParseFloatCoordinates(args[1], args[2])
 			distance = point.DistanceTo(virtualCar.Location)
 		} else {
-			distance = -1
+			distance = math.MaxFloat64
 		}
 		writer := bufio.NewWriter(conn)
-		writer.WriteString("COMPUTERESULT " + myNetAddr + " " + strconv.FormatFloat(distance, 'f', 4, 64) + " " + args[1] + "  " + args[2] + "\n")
+        fmt.Println(args[3])
+		writer.WriteString("COMPUTERESULT " + virtualCar.Name + " " + strconv.FormatFloat(distance, 'f', 4, 64) + " " + args[1] + " " + args[2] + " " + args[3] + "\n")
 		writer.Flush()
 	} else if args[0] == "PICKUP" {
 		//Pickup the customer
