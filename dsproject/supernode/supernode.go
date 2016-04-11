@@ -9,7 +9,13 @@ import (
 var name string
 var clients []util.Client
 
+var m map[string]util.Client
+
 func main() {
+    
+    //initialize the map
+    m:= make(map[string]util.Client)
+    
 	// connect to frontend instance
 	go dialServer()
 
@@ -24,5 +30,6 @@ func main() {
 		newClient := util.Client{Conn: conn, Name: "none"}
 		clients = append(clients, newClient)
 		go handleNode(newClient)
+
 	}
 }
