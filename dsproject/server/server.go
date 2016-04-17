@@ -3,25 +3,69 @@ package main
 import (
 	"bufio"
 	"dsproject/util"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
-    "strconv"
 )
 
 // Default HTTP Request Handler for UI
-func defaultHTTPHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "<h1>Hello from Team 9 %s!</h1>", r.URL.Path[1:])
+func dataHandler(w http.ResponseWriter, r *http.Request) {
+	d := DataTable{
+		ColsDesc: []ColDesc{
+			{Label: "X", Type: "number"},
+			{Label: "Y", Type: "number"},
+			{Label: "Y", Type: "number"},
+		},
+		Rows: []Row{
+			{
+				C: []ColVal{
+					{
+						V: 4,
+					},
+					{
+						V: 3,
+					},
+					{
+						V: "null",
+					},
+				},
+			},
+			{
+				C: []ColVal{
+					{
+						V: -1,
+					},
+					{
+						V: "null",
+					},
+					{
+						V: -7,
+					},
+				},
+			},
+		},
+	}
+	b, err := json.MarshalIndent(d, "", "	")
+	if err != nil {
+		fmt.Println(err)
+	}
+	// fmt.Printf("%s\n", b)
+	fmt.Fprintf(w, "%s\n", b)
+	// fmt.Fprintf(w, "<h1>Hello from Team 9 %s!</h1>", r.URL.Path[1:])
 }
 
 var clients []*util.Client
-var ReqID int
+var reqID int
+
 func main() {
 	//start HTTP UI server at 8080
 	go func() {
-		http.HandleFunc("/", defaultHTTPHandler)
+		http.Handle("/ride/", http.StripPrefix("/ride/", http.FileServer(http.Dir("./public"))))
+		http.HandleFunc("/api/data", dataHandler)
 		http.ListenAndServe(":8080", nil)
 	}()
 
@@ -81,9 +125,9 @@ func processCommand(cmd string) {
 
 			fmt.Println("[PICKUP] send to SN:" + client.Conn.RemoteAddr().String())
 			writer := bufio.NewWriter(conn)
-			writer.WriteString("PICKUP " + args[1] + " " + args[2] + " " + args[3] + " " + args[4] + " " + strconv.Itoa(ReqID)+"\n")
-			ReqID++
-            writer.Flush()
+			writer.WriteString("PICKUP " + args[1] + " " + args[2] + " " + args[3] + " " + args[4] + " " + strconv.Itoa(reqID) + "\n")
+			reqID++
+			writer.Flush()
 		}
 	}
 }
