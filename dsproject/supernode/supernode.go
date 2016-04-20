@@ -9,22 +9,31 @@ import (
 var name string
 var clients []util.Client
 
-//map for <request id, request struct>
-var REQMAP map[string]util.Request = make(map[string]util.Request)
+//REQMAP map for <request id, request struct>
+var REQMAP = make(map[string]util.Request)
 
-//counter for carnodes which are ordinary nodes and counter for supernodes
-var COUNTCAR int = 0
-var COUNTSUPER int = 0
+//COUNTCAR counter for carnodes which are ordinary nodes and counter for supernodes
+var COUNTCAR int // 0 is the default value
+
+//COUNTSUPER variable export comment placeholder
+var COUNTSUPER int // 0 is the default value
 
 func main() {
 
 	// connect to frontend instance
 	go dialServer()
 
+	// listen to peer(SuperNode) connection
+	go listenPeer()
+
 	// listen to node connection requests? (not sure if is required)
+	listenCarNode()
+}
+
+func listenCarNode() {
 	listener, err := net.Listen("tcp", ":6060")
 	util.CheckError(err)
-	fmt.Println("Supernode Listening at 6060")
+	fmt.Println("Supernode Listening at 6060 for CarNode connection")
 	for {
 		conn, err := listener.Accept()
 		util.CheckError(err)
