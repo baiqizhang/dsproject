@@ -11,14 +11,14 @@ import (
 	"strings"
 )
 
-func dialServer() {
+func dialServer(port string) {
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", util.ServerAddr)
 	util.CheckError(err)
 
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
 	util.CheckError(err)
 
-	_, err = conn.Write([]byte("SUPERNODE REGISTER SN1\r\n"))
+	_, err = conn.Write([]byte("SUPERNODE REGISTER " + port + "\r\n"))
 	util.CheckError(err)
 
 	reader := bufio.NewReader(conn)

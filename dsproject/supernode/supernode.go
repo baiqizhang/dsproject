@@ -3,11 +3,10 @@ package main
 import (
 	"dsproject/util"
 	"fmt"
-	"net"
+	"os"
 )
 
 var name string
-var clients []util.Client
 
 //REQMAP map for <request id, request struct>
 var REQMAP = make(map[string]util.Request)
@@ -19,28 +18,18 @@ var COUNTCAR int // 0 is the default value
 var COUNTSUPER int // 0 is the default value
 
 func main() {
+	args := os.Args[1:]
+	if len(args) != 1 {
+		fmt.Println("Usage: supernode PORT")
+		os.Exit(0)
+	}
 
 	// connect to frontend instance
-	go dialServer()
+	go dialServer(args[0])
 
-	// listen to peer(SuperNode) connection
-	go listenPeer()
+	// listen to peer(SuperNode) connection in Ring Topology
+	listenPeer(args[0])
 
 	// listen to node connection requests? (not sure if is required)
-	listenCarNode()
-}
-
-func listenCarNode() {
-	listener, err := net.Listen("tcp", ":6060")
-	util.CheckError(err)
-	fmt.Println("Supernode Listening at 6060 for CarNode connection")
-	for {
-		conn, err := listener.Accept()
-		util.CheckError(err)
-
-		newClient := util.Client{Conn: conn, Name: "none"}
-		clients = append(clients, newClient)
-		go handleNode(newClient)
-
-	}
+	// listenCarNode()
 }

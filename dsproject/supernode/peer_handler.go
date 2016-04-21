@@ -9,17 +9,21 @@ import (
 	"strings"
 )
 
-func listenPeer() {
+var lastClient *util.Client // = nil
+
+func listenPeer(port string) {
 	// listen to node connection requests? (not sure if is required)
-	listener, err := net.Listen("tcp", ":5050")
+	listener, err := net.Listen("tcp", ":"+port)
 	util.CheckError(err)
-	fmt.Println("Supernode Listening at 5050 for CarNode connection")
+	fmt.Println("Supernode Listening at " + port + " for SuperNode connection")
 	for {
 		conn, err := listener.Accept()
 		util.CheckError(err)
 
 		newClient := util.Client{Conn: conn, Name: "none"}
-		clients = append(clients, newClient)
+
+		lastClient = &newClient
+		// clients = append(clients, newClient)
 		go handlePeer(newClient)
 
 		//TODO handle newly joined peer
@@ -28,7 +32,7 @@ func listenPeer() {
 }
 
 func handlePeer(client util.Client) {
-	fmt.Println(client.Conn.RemoteAddr().String())
+	fmt.Println("[Peer Listener] new connection from" + client.Conn.RemoteAddr().String())
 	reader := bufio.NewReader(client.Conn)
 
 	// Read handler
@@ -39,7 +43,7 @@ func handlePeer(client util.Client) {
 		}
 		util.CheckError(err)
 
-		fmt.Println("[Node Message]:" + message)
+		fmt.Println("[Previous Node Message]:" + message)
 		words := strings.Split(strings.Trim(message, "\r\n"), " ")
 
 		//TODO processPeerCommand(message)

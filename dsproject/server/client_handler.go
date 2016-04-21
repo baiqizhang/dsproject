@@ -5,8 +5,12 @@ import (
 	"dsproject/util"
 	"fmt"
 	"io"
+	"net"
 	"strings"
 )
+
+var lastClient *util.Client // = nil
+var superNodeCount int
 
 func handleClient(client *util.Client) {
 	conn := client.Conn
@@ -31,6 +35,21 @@ func handleClient(client *util.Client) {
 		if words[0] == "SUPERNODE" {
 			if words[1] == "REGISTER" {
 				client.Name = words[2]
+				if lastClient != nil {
+					//tell the newcomer the last supernode's address
+					addr := lastClient.Conn.RemoteAddr()
+					writer.WriteString("PEERADDR " + addr.(*net.TCPAddr).IP.String() + ":" + lastClient.Name)
+					writer.Flush()
+
+					if superNodeCount == 1 {
+						tempWriter := bufio.NewWriter(lastClient.Conn)
+						addr := client.Conn.RemoteAddr()
+						tempWriter.WriteString("PEERADDR " + addr.(*net.TCPAddr).IP.String() + ":" + words[2])
+						tempWriter.Flush()
+					}
+				}
+				lastClient = client
+				superNodeCount++
 				continue
 			}
 		}
