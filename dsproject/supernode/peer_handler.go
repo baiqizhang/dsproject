@@ -11,7 +11,7 @@ import (
 
 var lastClient *util.Client // = nil
 
-func listenPeer(port string) {
+func listenPeer() {
 	// listen to node connection requests? (not sure if is required)
 	listener, err := net.Listen("tcp", ":"+port)
 	util.CheckError(err)
@@ -22,11 +22,8 @@ func listenPeer(port string) {
 
 		newClient := util.Client{Conn: conn, Name: "none"}
 
-		lastClient = &newClient
 		// clients = append(clients, newClient)
 		go handlePeer(newClient)
-
-		//TODO handle newly joined peer
 	}
 
 }
@@ -46,9 +43,14 @@ func handlePeer(client util.Client) {
 		fmt.Println("[Previous Node Message]:" + message)
 		words := strings.Split(strings.Trim(message, "\r\n"), " ")
 
-		//TODO processPeerCommand(message)
-		if words[0] == "REDIRECT" {
-
+		if words[0] == "HEARTBEAT" {
+			if lastClient != nil {
+				writer := bufio.NewWriter(lastClient.Conn)
+				newPeerAddr := client.Conn.RemoteAddr()
+				writer.WriteString("REDIRECT " + newPeerAddr.(*net.TCPAddr).IP.String() + ":" + words[1] + "\n")
+				writer.Flush()
+			}
+			lastClient = &client
 		}
 
 	}
@@ -62,6 +64,10 @@ func dialPeer(peerAddr string) {
 	util.CheckError(err)
 
 	reader := bufio.NewReader(conn)
+	writer := bufio.NewWriter(conn)
+	//1st message
+	writer.WriteString("HEARTBEAT " + port + "\n")
+	writer.Flush()
 	// Read handler
 	for {
 		message, err := reader.ReadString('\n')
@@ -71,7 +77,13 @@ func dialPeer(peerAddr string) {
 		util.CheckError(err)
 
 		fmt.Println("[Next Peer Message]:" + message)
-		//TODO processPeerCommand(message)
+
+		words := strings.Split(strings.Trim(message, "\r\n"), " ")
+		if words[0] == "REDIRECT" {
+			conn.Close()
+			dialPeer(words[1])
+			break
+		}
 	}
 
 }

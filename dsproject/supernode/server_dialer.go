@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func dialServer(port string) {
+func dialServer() {
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", util.ServerAddr)
 	util.CheckError(err)
 

@@ -37,12 +37,6 @@ func handleNode(client util.Client) {
 		COUNTCAR++
 	}
 
-	// if connection comes from SuperNode
-	if message == "SUPERNODE\n" {
-		fmt.Println("this is a " + message)
-		COUNTSUPER++
-	}
-
 	// Read handler
 	for {
 		message, err := reader.ReadString('\n')

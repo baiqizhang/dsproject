@@ -6,7 +6,8 @@ import (
 	"os"
 )
 
-var name string
+var port string
+var clients []util.Client
 
 //REQMAP map for <request id, request struct>
 var REQMAP = make(map[string]util.Request)
@@ -23,12 +24,13 @@ func main() {
 		fmt.Println("Usage: supernode PORT")
 		os.Exit(0)
 	}
+	port = args[0]
 
 	// connect to frontend instance
-	go dialServer(args[0])
+	go dialServer()
 
 	// listen to peer(SuperNode) connection in Ring Topology
-	listenPeer(args[0])
+	listenPeer()
 
 	// listen to node connection requests? (not sure if is required)
 	// listenCarNode()
