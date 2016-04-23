@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"strings"
+	"time"
 )
 
 var lastClient *util.Client // = nil
@@ -43,7 +44,7 @@ func handlePeer(client util.Client) {
 		fmt.Println("[Previous Node Message]:" + message)
 		words := strings.Split(strings.Trim(message, "\r\n"), " ")
 
-		if words[0] == "HEARTBEAT" {
+		if words[0] == "NEWCONN" {
 			if lastClient != nil {
 				writer := bufio.NewWriter(lastClient.Conn)
 				newPeerAddr := client.Conn.RemoteAddr()
@@ -66,8 +67,14 @@ func dialPeer(peerAddr string) {
 	reader := bufio.NewReader(conn)
 	writer := bufio.NewWriter(conn)
 	//1st message
-	writer.WriteString("HEARTBEAT " + port + "\n")
-	writer.Flush()
+	writer.WriteString("NEWCONN " + port + "\n")
+	go func() {
+		for {
+			writer.WriteString("HEARTBEAT " + port + "\n")
+			writer.Flush()
+			time.Sleep(1000 * time.Millisecond)
+		}
+	}()
 	// Read handler
 	for {
 		message, err := reader.ReadString('\n')
