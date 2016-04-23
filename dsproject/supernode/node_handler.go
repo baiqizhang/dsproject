@@ -11,9 +11,12 @@ import (
 )
 
 func listenCarNode() {
-	listener, err := net.Listen("tcp", ":6060")
+	carNodePortInt, err := strconv.Atoi(port)
+	carNodePortString := strconv.Itoa(carNodePortInt + 1)
+
+	listener, err := net.Listen("tcp", ":"+carNodePortString)
 	util.CheckError(err)
-	fmt.Println("Supernode Listening at 6060 for CarNode connection")
+	fmt.Println("Supernode Listening at " + carNodePortString + " for CarNode connection")
 	for {
 		conn, err := listener.Accept()
 		util.CheckError(err)
