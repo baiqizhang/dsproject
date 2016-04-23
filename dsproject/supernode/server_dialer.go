@@ -22,6 +22,7 @@ func dialServer() {
 	_, err = conn.Write([]byte("SUPERNODE REGISTER " + port + "\r\n"))
 	util.CheckError(err)
 
+	// send Heartbeat
 	go func() {
 		for {
 			writer := bufio.NewWriter(conn)
@@ -30,7 +31,6 @@ func dialServer() {
 			time.Sleep(1000 * time.Millisecond)
 		}
 	}()
-	// Rea
 
 	reader := bufio.NewReader(conn)
 	// Read handler

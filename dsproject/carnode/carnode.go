@@ -22,7 +22,7 @@ func main() {
 		fmt.Println("Usage: carnode XCOORD YCOORD NAME [-v]")
 		os.Exit(0)
 	}
-	for arg := range args {
+	for _, arg := range args {
 		if arg == "-v" {
 			util.Verbose = 1
 		}
