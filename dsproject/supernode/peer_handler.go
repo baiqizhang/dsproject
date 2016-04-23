@@ -41,10 +41,13 @@ func handlePeer(client util.Client) {
 		}
 		util.CheckError(err)
 
-		fmt.Println("[Previous Node Message]:" + message)
+		if util.Verbose == 1 {
+			fmt.Println("[Previous Node Message]:" + message)
+		}
 		words := strings.Split(strings.Trim(message, "\r\n"), " ")
 
 		if words[0] == "NEWCONN" {
+			fmt.Println("[Previous Node Message]:" + message)
 			if lastClient != nil {
 				writer := bufio.NewWriter(lastClient.Conn)
 				newPeerAddr := client.Conn.RemoteAddr()

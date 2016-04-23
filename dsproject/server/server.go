@@ -62,6 +62,13 @@ var clients []*util.Client
 var reqID int
 
 func main() {
+	args := os.Args[1:]
+	for _, arg := range args {
+		if arg == "-v" {
+			util.Verbose = 1
+		}
+	}
+
 	//start HTTP UI server at 8080
 	go func() {
 		http.Handle("/ride/", http.StripPrefix("/ride/", http.FileServer(http.Dir("./public"))))

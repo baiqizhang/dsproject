@@ -9,6 +9,9 @@ import (
 	"time"
 )
 
+// Verbose verbose mode
+var Verbose = 0
+
 /*
 	Communication
 */
