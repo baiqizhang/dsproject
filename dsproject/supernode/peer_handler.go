@@ -33,7 +33,7 @@ func handlePeer(client util.Client) {
 	fmt.Println("[Peer Listener] new connection from" + client.Conn.RemoteAddr().String())
 	reader := bufio.NewReader(client.Conn)
 
-	// Read handler
+	// Read message that comes from previous node(passive connection)
 	for {
 		message, err := reader.ReadString('\n')
 		if err == io.EOF {
@@ -75,7 +75,8 @@ func dialPeer(peerAddr string) {
 			time.Sleep(1000 * time.Millisecond)
 		}
 	}()
-	// Read handler
+
+	// Read message that comes from the dialed node(active connection)
 	for {
 		message, err := reader.ReadString('\n')
 		if err == io.EOF {

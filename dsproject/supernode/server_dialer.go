@@ -9,6 +9,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func dialServer() {
@@ -20,6 +21,16 @@ func dialServer() {
 
 	_, err = conn.Write([]byte("SUPERNODE REGISTER " + port + "\r\n"))
 	util.CheckError(err)
+
+	go func() {
+		for {
+			writer := bufio.NewWriter(conn)
+			writer.WriteString("SUPERNODE HEARTBEAT " + port + "\n")
+			writer.Flush()
+			time.Sleep(1000 * time.Millisecond)
+		}
+	}()
+	// Rea
 
 	reader := bufio.NewReader(conn)
 	// Read handler

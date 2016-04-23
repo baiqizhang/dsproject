@@ -9,8 +9,10 @@ import (
 	"strings"
 )
 
-var lastClient *util.Client // = nil
+var lastSNClient *util.Client // = nil
 var superNodeCount int
+
+// var superNodeAliveCounter = make(map[*util.Client]int)
 
 func handleClient(client *util.Client) {
 	conn := client.Conn
@@ -26,30 +28,39 @@ func handleClient(client *util.Client) {
 		}
 		util.CheckError(err)
 
-		fmt.Print("[Message Received]:" + message)
+		if util.Verbose == 1 {
+			fmt.Print("[Message Received]:" + message)
+		}
 
 		words := strings.Split(message, " ")
 
 		// if connection comes from CarNode
 		client.Type = words[0]
 		if words[0] == "SUPERNODE" {
+			//mark the client as alive
+			// superNodeAliveCounter[&client] = 5
+
+			// check the 2nd arg
 			if words[1] == "REGISTER" {
 				client.Name = words[2]
-				if lastClient != nil {
+				if lastSNClient != nil {
 					//tell the newcomer the last supernode's address
-					addr := lastClient.Conn.RemoteAddr()
-					writer.WriteString("PEERADDR " + addr.(*net.TCPAddr).IP.String() + ":" + lastClient.Name)
+					addr := lastSNClient.Conn.RemoteAddr()
+					writer.WriteString("PEERADDR " + addr.(*net.TCPAddr).IP.String() + ":" + lastSNClient.Name)
 					writer.Flush()
 
 					if superNodeCount == 1 {
-						tempWriter := bufio.NewWriter(lastClient.Conn)
+						tempWriter := bufio.NewWriter(lastSNClient.Conn)
 						addr := client.Conn.RemoteAddr()
 						tempWriter.WriteString("PEERADDR " + addr.(*net.TCPAddr).IP.String() + ":" + words[2])
 						tempWriter.Flush()
 					}
 				}
-				lastClient = client
+				lastSNClient = client
 				superNodeCount++
+				continue
+			}
+			if words[1] == "HEARTBEAT" {
 				continue
 			}
 		}

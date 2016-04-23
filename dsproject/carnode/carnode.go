@@ -5,12 +5,12 @@ import (
 	"container/list"
 	"dsproject/util"
 	"fmt"
+	"math"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 	"time"
-    "math"
 )
 
 var virtualCar util.VirtualCar
@@ -18,9 +18,13 @@ var virtualCar util.VirtualCar
 func main() {
 	// Check arguments
 	args := os.Args[1:]
-	if len(args) != 3 {
-		fmt.Println("Usage: carnode XCOORD YCOORD NAME ")
+	if len(args) < 3 {
+		fmt.Println("Usage: carnode XCOORD YCOORD NAME [-v]")
 		os.Exit(0)
+	}
+		if arg == "-v" {
+			util.Verbose = 1
+		}
 	}
 
 	// set car current position
@@ -31,7 +35,7 @@ func main() {
 	}
 	virtualCar.Location = *ptrPoint
 	virtualCar.Idle = true
-    virtualCar.Name = args[2]
+	virtualCar.Name = args[2]
 
 	// Get supernode addresses
 	supernodes := getSupernodesAddr()
@@ -79,8 +83,8 @@ func dialSuperNode(supernode string) {
 		conn, err = net.Dial("tcp", supernode)
 	}
 
-    conn.Write([]byte("CARNODE\n"))
-    
+	conn.Write([]byte("CARNODE\n"))
+
 	connbuf := bufio.NewReader(conn)
 	for {
 		cmd, _ := connbuf.ReadString('\n')
@@ -104,7 +108,7 @@ func processCommand(cmd string, conn net.Conn) {
 			distance = math.MaxFloat64
 		}
 		writer := bufio.NewWriter(conn)
-        fmt.Println(args[3])
+		fmt.Println(args[3])
 		writer.WriteString("COMPUTERESULT " + virtualCar.Name + " " + strconv.FormatFloat(distance, 'f', 4, 64) + " " + args[1] + " " + args[2] + " " + args[3] + "\n")
 		writer.Flush()
 	} else if args[0] == "PICKUP" {
