@@ -5,19 +5,29 @@ import (
 	"dsproject/util"
 	"fmt"
 	"io"
+	"math/rand"
 	"net"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
 var lastSNClient *util.Client // = nil
-var superNodeCount int
 
 var superNodeAliveCounter = make(map[string]int)
+var aliveSuperNodeAddrs []string
+var l sync.Mutex
 
 //check if connection from SN is broken
 func checkConnection() {
 	for {
+		l.Lock()
+		aliveSuperNodeAddrs = make([]string, 0, len(superNodeAliveCounter))
+		for k := range superNodeAliveCounter {
+			aliveSuperNodeAddrs = append(aliveSuperNodeAddrs, k)
+		}
+
 		for key, value := range superNodeAliveCounter {
 			superNodeAliveCounter[key] = value - 1
 			if util.Verbose == 1 {
@@ -28,6 +38,7 @@ func checkConnection() {
 				fmt.Println("[Supernode] Lost connection: " + key)
 			}
 		}
+		l.Unlock()
 		time.Sleep(500 * time.Millisecond)
 	}
 }
@@ -39,6 +50,7 @@ func handleClient(client *util.Client) {
 
 	reader := bufio.NewReader(conn)
 	writer := bufio.NewWriter(conn)
+
 	// Read handler
 	for {
 		message, err := reader.ReadString('\n')
@@ -64,21 +76,23 @@ func handleClient(client *util.Client) {
 
 			// check the 2nd arg
 			if words[1] == "REGISTER" {
+				fmt.Print("[SuperNode]" + message)
 				client.Name = newSNPortStr
 				if lastSNClient != nil {
 					//tell the newcomer the last supernode's ip:port
 					lastSNAddr := lastSNClient.Conn.RemoteAddr()
-					writer.WriteString("PEERADDR " + lastSNAddr.(*net.TCPAddr).IP.String() + ":" + lastSNClient.Name)
+					writer.WriteString("PEERADDR " + lastSNAddr.(*net.TCPAddr).IP.String() + ":" + lastSNClient.Name + "\n")
 					writer.Flush()
 
-					if superNodeCount == 1 {
+					// close the ring when node count = 2
+					fmt.Println(superNodeAliveCounter)
+					if len(superNodeAliveCounter) == 2 {
 						tempWriter := bufio.NewWriter(lastSNClient.Conn)
-						tempWriter.WriteString("PEERADDR " + newSNIPStr + ":" + newSNPortStr)
+						tempWriter.WriteString("PEERADDR " + newSNIPStr + ":" + newSNPortStr + "\n")
 						tempWriter.Flush()
 					}
 				}
 				lastSNClient = client
-				superNodeCount++
 				continue
 			}
 			if words[1] == "HEARTBEAT" {
@@ -87,8 +101,22 @@ func handleClient(client *util.Client) {
 		}
 		if words[0] == "NODE" {
 			if words[1] == "REGISTER" {
-				fmt.Println("[Node Register] send hardcoded supernode addr")
-				writer.WriteString("127.0.0.1:6060\n")
+				for {
+					l.Lock()
+					aliveSuperNodeAddrs = make([]string, 0, len(superNodeAliveCounter))
+					for k := range superNodeAliveCounter {
+						aliveSuperNodeAddrs = append(aliveSuperNodeAddrs, k)
+					}
+					fmt.Println(aliveSuperNodeAddrs)
+					fmt.Println(len(aliveSuperNodeAddrs))
+					if len(aliveSuperNodeAddrs) == 0 {
+						l.Unlock()
+						fmt.Println("[Node Register] no SN available, waiting...")
+						time.Sleep(1000 * time.Millisecond)
+					} else {
+						break
+					}
+				}
 				writer.Flush()
 				client.Conn.Close()
 				return

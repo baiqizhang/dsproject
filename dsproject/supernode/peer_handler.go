@@ -72,6 +72,7 @@ func dialPeer(peerAddr string) {
 	//1st message
 	writer.WriteString("NEWCONN " + port + "\n")
 	go func() {
+		fmt.Println("[dialPeer]: sending HB to " + peerAddr)
 		for {
 			writer.WriteString("HEARTBEAT " + port + "\n")
 			writer.Flush()
