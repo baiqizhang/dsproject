@@ -117,6 +117,19 @@ func handleClient(client *util.Client) {
 						break
 					}
 				}
+				fmt.Println("[Node Register] send a random supernode addr")
+				index := rand.Intn(len(aliveSuperNodeAddrs))
+				addrString := aliveSuperNodeAddrs[index]
+				l.Unlock()
+
+				// port for carnodes is port for SN + 1
+				parts := strings.Split(addrString, ":")
+				SNIP := parts[0]
+				SNPort := parts[1]
+				SNPortInt, _ := strconv.Atoi(SNPort)
+				SNPort = strconv.Itoa(SNPortInt + 1)
+
+				writer.WriteString(SNIP + ":" + SNPort + "\n")
 				writer.Flush()
 				client.Conn.Close()
 				return
